@@ -3,15 +3,27 @@ import click
 import logging
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
+from torchvision import datasets, transforms
 
-
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
+#@click.command()
+#@click.argument('input_filepath', type=click.Path(exists=True))
+#@click.argument('output_filepath', type=click.Path())
+def main(input_filepath='~/MLOpsDTU/data', output_filepath='~/MLOpsDTU/data'):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
+    # exchange with the real mnist dataset
+    transform = transforms.Compose([transforms.ToTensor(),
+                                transforms.Normalize((0.5,), (0.5,)),
+                              ])
+    # Download and transform the training data
+    datasets.MNIST(input_filepath, download=True, train=True)
+    datasets.MNIST(output_filepath, download=False, train=True, transform=transform)
+
+    # Download and transform the test data
+    datasets.MNIST(input_filepath, download=True, train=False)
+    datasets.MNIST(output_filepath, download=False, train=False, transform=transform)
+
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
