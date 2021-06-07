@@ -31,10 +31,10 @@ class TrainOREvaluate(object):
     def train(self):
         print("Training day and night")
         parser = argparse.ArgumentParser(description='Training arguments')
-        parser.add_argument('--lr', default=0.0001)
+        parser.add_argument('--lr', default=0.0005)
         parser.add_argument('--batch_size', default=64)
         parser.add_argument('--weight_decay', default=1e-5)
-        parser.add_argument('--epochs', default=50)
+        parser.add_argument('--epochs', default=15)
         
         # add any additional argument that you want
         args = parser.parse_args(sys.argv[2:])
@@ -49,14 +49,12 @@ class TrainOREvaluate(object):
         
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True)
         model = MyAwesomeModel(num_classes, channels, height, width, 
-                                   [{'nFilters':20, 'kernel':6, 'stride':2, 'padding':2}],
-                                   [32, 16])
+                                   [{'nFilters':40, 'kernel':3, 'stride':1, 'padding':1},
+                                   {'nFilters':80, 'kernel':3, 'stride':1, 'padding':1}],
+                                   [128, 64])
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         
-        fig, ax = plt.subplots()
-        plt.ion()
-        plt.show()
         losses = []
         model.train()
         
@@ -72,9 +70,8 @@ class TrainOREvaluate(object):
                 optimizer.step()
                 running_loss += loss.item()
             losses.append(running_loss/len(trainloader))
-            fig.clf()
-            ax.plot(losses)
-            plt.pause(0.05)
+        plt.plot(losses)
+        plt.show()
         torch.save(model.state_dict(), 'model_state')
         
     def evaluate(self):
@@ -84,7 +81,7 @@ class TrainOREvaluate(object):
         parser.add_argument('--batch_size', default=64)
         # add any additional argument that you want
         args = parser.parse_args(sys.argv[2:])
-        print(args)
+        #print(args)
         
         # TODO: Implement evaluation logic here
         _, testset = mnist()
@@ -96,16 +93,19 @@ class TrainOREvaluate(object):
         testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, shuffle=True)
         if args.load_model_from:
             model = MyAwesomeModel(num_classes, channels, height, width, 
-                                       [{'nFilters':20, 'kernel':6, 'stride':2, 'padding':2}],
-                                       [32, 16])
+                                   [{'nFilters':40, 'kernel':3, 'stride':1, 'padding':1},
+                                   {'nFilters':80, 'kernel':3, 'stride':1, 'padding':1}],
+                                   [128, 64])
             model.load_state_dict(torch.load(args.load_model_from))
             
         model.eval()
         total=0
+        i = 0
         for inputs, labels in testloader: 
             preds = np.argmax(model(inputs).detach().numpy(), axis=1)
             total += np.sum(labels.detach().numpy() == preds)
-        print('Accuracy of the network on the {} test images: {:4.2f} %'.format(len(testloader), total/len(testloader)))
+            i += len(labels)
+        print('Accuracy of the network on the {} test images: {:4.2f} %'.format(i, total/i*100))
             
 if __name__ == '__main__':
     TrainOREvaluate()
