@@ -8,7 +8,7 @@ from torchvision import datasets, transforms
 #@click.command()
 #@click.argument('input_filepath', type=click.Path(exists=True))
 #@click.argument('output_filepath', type=click.Path())
-def main(input_filepath='~/MLOpsDTU/data', output_filepath='~/MLOpsDTU/data'):
+def main(output_filepath='~/MLOpsDTU/data/'):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
@@ -16,17 +16,15 @@ def main(input_filepath='~/MLOpsDTU/data', output_filepath='~/MLOpsDTU/data'):
     transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize((0.5,), (0.5,)),
                               ])
-    # Download and transform the training data
-    datasets.MNIST(input_filepath, download=True, train=True)
-    datasets.MNIST(output_filepath, download=False, train=True, transform=transform)
-
-    # Download and transform the test data
-    datasets.MNIST(input_filepath, download=True, train=False)
-    datasets.MNIST(output_filepath, download=False, train=False, transform=transform)
+    # Download data
+    datasets.MNIST(output_filepath, download=True, train=True)
+    datasets.MNIST(output_filepath, download=True, train=False)
 
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
-
+    logger.info('Making final data set from raw data')
+    # Transform data
+    datasets.MNIST(output_filepath, download=False, train=True, transform=transform)
+    datasets.MNIST(output_filepath, download=False, train=False, transform=transform)
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
