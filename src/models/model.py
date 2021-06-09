@@ -54,6 +54,9 @@ class MyAwesomeModel(nn.Module):
         self.layers_hidden = nn.Sequential(*self.layers_hidden)
         
     def forward(self, x):
+        if x.shape[1] != 1 or x.shape[2] != 28 or x.shape[3] != 28:
+            raise ValueError('Expected each sample to have shape [1, 28, 28]')
+
         x = self.layers_conv(x)
         x = x.view(-1, self.in_hidden_features)
         x = self.layers_hidden(x)

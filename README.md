@@ -2,6 +2,7 @@ MLOpsDTU
 ==============================
 
 Course exercises
+MNIST model and visualisation
 
 Project Organization
 ------------
